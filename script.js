@@ -282,8 +282,16 @@ function goHome() {
   buildCatGrid();
 }
 
-function goHome() {
-  showScreen('screen-home');
+function toggleMusic() {
+  const audio = document.getElementById('bg-music');
+  const btn = document.getElementById('music-toggle');
+  if (audio.paused) {
+    audio.play();
+    btn.textContent = '🔊';
+  } else {
+    audio.pause();
+    btn.textContent = '🔇';
+  }
 }
 
 function showScreen(id) {
