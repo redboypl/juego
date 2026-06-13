@@ -282,7 +282,8 @@ function goHome() {
   buildCatGrid();
 }
 
-const BG_MUSIC_SRC = "Cita_de_Bases.mp3";
+const BG_MUSIC_SRC = "Cita%_de_Bases.mp3";
+
 function toggleMusic() {
   const audio = document.getElementById("bg-music");
   const btn = document.getElementById("music-toggle");
