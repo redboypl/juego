@@ -1,8 +1,7 @@
 const TIMER_MAX = 15;
 const allQuestions = {
   lvbp: {
-    name: "LVBP",
-    icon: "🦁",
+    name: "LVBP", icon: "🦁",
     desc: "Todo sobre los equipos, estadios y rivalidades de la Liga Venezolana de Béisbol Profesional.",
     questions: [
       { q: "¿Cuántos equipos conforman actualmente la LVBP?", opts: ["6", "7", "8", "10"], a: 2, fact: "La LVBP tiene 8 equipos: Cardenales, Leones, Tiburones, Magallanes, Caracas, Lara, Aragua y Margarita." },
@@ -16,8 +15,7 @@ const allQuestions = {
     ]
   },
   grandesligas: {
-    name: "Grandes Ligas",
-    icon: "🌟",
+    name: "Grandes Ligas", icon: "🌟",
     desc: "Peloteros venezolanos que triunfaron en la MLB: sus logros, equipos y récords históricos.",
     questions: [
       { q: "¿En qué posición jugó Omar Vizquel durante casi toda su carrera?", opts: ["Segunda base", "Tercera base", "Campo corto", "Centro del jardín"], a: 2, fact: "Omar Vizquel es considerado uno de los mejores campocortos defensivos de la historia." },
@@ -31,8 +29,7 @@ const allQuestions = {
     ]
   },
   historia: {
-    name: "Historia",
-    icon: "📖",
+    name: "Historia", icon: "📖",
     desc: "Los orígenes del béisbol en Venezuela, sus pioneros y los momentos que marcaron la historia del deporte criollo.",
     questions: [
       { q: "¿En qué año se fundó la Liga Venezolana de Béisbol?", opts: ["1922", "1945", "1951", "1960"], a: 1, fact: "La LVBP fue fundada en 1945, siendo una de las ligas más antiguas de América Latina." },
@@ -46,8 +43,7 @@ const allQuestions = {
     ]
   },
   cultura: {
-    name: "Cultura",
-    icon: "🇻🇪",
+    name: "Cultura", icon: "🇻🇪",
     desc: "La relación entre el béisbol y la identidad venezolana: tradiciones, términos criollos y curiosidades del fanático.",
     questions: [
       { q: "¿Cuál es el deporte nacional de Venezuela según la ley?", opts: ["Fútbol", "Béisbol", "Boxeo", "Ciclismo"], a: 1, fact: "El béisbol es el deporte nacional de Venezuela, declarado así oficialmente." },
@@ -62,34 +58,18 @@ const allQuestions = {
   }
 };
 
-let selectedCat = null;
-let questions = [];
-let current = 0, score = 0, correct = 0, streak = 0, bestStreak = 0, totalBonus = 0;
-let timeLeft = TIMER_MAX;
-let timerInterval = null;
-let answered = false;
+// --- Estado del juego ---
+let selectedCat = null, questions = [], current = 0, score = 0, correct = 0,
+    streak = 0, bestStreak = 0, totalBonus = 0, timeLeft = TIMER_MAX,
+    timerInterval = null, answered = false;
 
-function buildCatGrid() {
-  const grid = document.getElementById('cat-grid');
-  grid.innerHTML = '';
-  Object.entries(allQuestions).forEach(([key, cat]) => {
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (selectedCat === key ? ' selected' : '');
-    btn.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div>`;
-    btn.onclick = () => { selectedCat = key; buildCatGrid(); };
-    grid.appendChild(btn);
-  });
-}
+// --- Helpers DOM ---
+const $ = id => document.getElementById(id);
+const $$ = sel => document.querySelectorAll(sel);
 
-function startGame() {
-  if (!selectedCat) {
-    const keys = Object.keys(allQuestions);
-    selectedCat = keys[Math.floor(Math.random() * keys.length)];
-  }
-  questions = shuffle([...allQuestions[selectedCat].questions]).slice(0, 8);
-  current = 0; score = 0; correct = 0; streak = 0; bestStreak = 0; totalBonus = 0; answered = false;
-  showScreen('screen-game');
-  renderQuestion();
+function showScreen(id) {
+  $$('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
 }
 
 function shuffle(arr) {
@@ -100,86 +80,79 @@ function shuffle(arr) {
   return arr;
 }
 
+const calcBonus = elapsed => elapsed < 5 ? 25 : elapsed < 10 ? 15 : 10;
+
+// --- Timer ---
+const TIMER_STYLES = [
+  { min: 11, barBg: '#639922', numColor: '#3B6D11', cls: 'fast', label: '⚡ Responde rápido — bonus +25 pts' },
+  { min: 6,  barBg: '#BA7517', numColor: '#854F0B', cls: 'normal', label: '🟢 Todavía puedes ganar +15 pts' },
+  { min: 0,  barBg: '#E24B4A', numColor: '#A32D2D', cls: 'slow', label: '⏱ Apúrate — bonus +10 pts' },
+];
+
+function getTimerStyle(t) {
+  return TIMER_STYLES.find(s => t > s.min) || TIMER_STYLES[2];
+}
+
+function updateTimerUI() {
+  const bar = $('timer-bar'), num = $('timer-num'), banner = $('bonus-banner');
+  const style = getTimerStyle(timeLeft);
+  num.textContent = timeLeft;
+  bar.style.width = ((timeLeft / TIMER_MAX) * 100) + '%';
+  bar.style.background = style.barBg;
+  num.style.color = style.numColor;
+  if (!answered) {
+    banner.className = 'bonus-banner ' + style.cls;
+    banner.textContent = style.label;
+  }
+}
+
 function startTimer() {
   clearInterval(timerInterval);
   timeLeft = TIMER_MAX;
   updateTimerUI();
   timerInterval = setInterval(() => {
-    timeLeft--;
-    updateTimerUI();
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      timeoutQuestion();
-    }
+    if (--timeLeft <= 0) { clearInterval(timerInterval); timeoutQuestion(); }
+    else updateTimerUI();
   }, 1000);
 }
 
-function updateTimerUI() {
-  const pct = (timeLeft / TIMER_MAX) * 100;
-  const bar = document.getElementById('timer-bar');
-  const num = document.getElementById('timer-num');
-  num.textContent = timeLeft;
-  bar.style.width = pct + '%';
-  if (timeLeft > 10) {
-    bar.style.background = '#639922';
-    num.style.color = '#3B6D11';
-  } else if (timeLeft > 5) {
-    bar.style.background = '#BA7517';
-    num.style.color = '#854F0B';
-  } else {
-    bar.style.background = '#E24B4A';
-    num.style.color = '#A32D2D';
-  }
-
-  const banner = document.getElementById('bonus-banner');
-  if (!answered) {
-    if (timeLeft > 10) {
-      banner.className = 'bonus-banner fast';
-      banner.textContent = '⚡ Responde rápido — bonus +25 pts';
-    } else if (timeLeft > 5) {
-      banner.className = 'bonus-banner normal';
-      banner.textContent = '🟢 Todavía puedes ganar +15 pts';
-    } else {
-      banner.className = 'bonus-banner slow';
-      banner.textContent = '⏱ Apúrate — bonus +10 pts';
-    }
-  }
+// --- Botón siguiente ---
+function setNextBtn(isLast) {
+  const btn = $('btn-next');
+  btn.textContent = isLast ? 'Ver resultado →' : 'Siguiente →';
+  btn.className = 'btn-next show';
 }
 
-function calcBonus(elapsed) {
-  if (elapsed < 5) return 25;
-  if (elapsed < 10) return 15;
-  return 10;
+function setBanner(cls, text) {
+  const b = $('bonus-banner');
+  b.className = 'bonus-banner ' + cls;
+  b.textContent = text;
 }
 
+// --- Timeout ---
 function timeoutQuestion() {
   if (answered) return;
   answered = true;
   streak = 0;
   const q = questions[current];
-  document.querySelectorAll('.opt-btn').forEach(b => { b.disabled = true; b.classList.add('timeout'); });
-  document.querySelectorAll('.opt-btn')[q.a].classList.remove('timeout');
-  document.querySelectorAll('.opt-btn')[q.a].classList.add('correct');
-  document.getElementById('feedback').textContent = `⏱ Tiempo agotado. ${q.fact}`;
-  document.getElementById('feedback').className = 'feedback show';
-  const banner = document.getElementById('bonus-banner');
-  banner.className = 'bonus-banner slow';
-  banner.textContent = '⏱ Sin puntos esta vez';
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.textContent = current + 1 < questions.length ? 'Siguiente →' : 'Ver resultado →';
-  nextBtn.className = 'btn-next show';
+  $$('.opt-btn').forEach(b => { b.disabled = true; b.classList.add('timeout'); });
+  $$('.opt-btn')[q.a].classList.replace('timeout', 'correct');
+  $('feedback').textContent = `⏱ Tiempo agotado. ${q.fact}`;
+  $('feedback').className = 'feedback show';
+  setBanner('slow', '⏱ Sin puntos esta vez');
+  setNextBtn(current + 1 >= questions.length);
 }
 
+// --- Respuesta ---
 function answer(idx, btn) {
   if (answered) return;
   answered = true;
   clearInterval(timerInterval);
   const elapsed = TIMER_MAX - timeLeft;
   const q = questions[current];
-  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-  document.querySelectorAll('.opt-btn')[q.a].classList.add('correct');
-
-  const banner = document.getElementById('bonus-banner');
+  const isLast = current + 1 >= questions.length;
+  $$('.opt-btn').forEach(b => b.disabled = true);
+  $$('.opt-btn')[q.a].classList.add('correct');
 
   if (idx === q.a) {
     const speedBonus = calcBonus(elapsed);
@@ -187,51 +160,43 @@ function answer(idx, btn) {
     streak++;
     if (streak > bestStreak) bestStreak = streak;
     const pts = speedBonus + streakBonus;
-    score += pts;
-    totalBonus += pts;
-    correct++;
+    score += pts; totalBonus += pts; correct++;
 
-    let bannerText = '';
-    if (elapsed < 5) { banner.className = 'bonus-banner fast'; bannerText = `⚡ ¡Rapidísimo! +${speedBonus} pts`; }
-    else if (elapsed < 10) { banner.className = 'bonus-banner normal'; bannerText = `🟢 ¡Correcto! +${speedBonus} pts`; }
-    else { banner.className = 'bonus-banner slow'; bannerText = `🟡 ¡Correcto! +${speedBonus} pts`; }
-    if (streakBonus > 0) { banner.className = 'bonus-banner streak'; bannerText += ` + 🔥 racha +${streakBonus}`; }
-    banner.textContent = bannerText;
-
-    document.getElementById('feedback').textContent = `✅ ${q.fact}`;
+    const speedCls = elapsed < 5 ? 'fast' : elapsed < 10 ? 'normal' : 'slow';
+    const speedIcon = elapsed < 5 ? '⚡ ¡Rapidísimo!' : elapsed < 10 ? '🟢 ¡Correcto!' : '🟡 ¡Correcto!';
+    let bannerText = `${speedIcon} +${speedBonus} pts`;
+    if (streakBonus > 0) bannerText += ` + 🔥 racha +${streakBonus}`;
+    setBanner(streakBonus > 0 ? 'streak' : speedCls, bannerText);
+    $('feedback').textContent = `✅ ${q.fact}`;
   } else {
     btn.classList.add('wrong');
     streak = 0;
-    banner.className = 'bonus-banner slow';
-    banner.textContent = '❌ Incorrecto — 0 pts';
-    document.getElementById('feedback').textContent = `❌ ${q.fact}`;
+    setBanner('slow', '❌ Incorrecto — 0 pts');
+    $('feedback').textContent = `❌ ${q.fact}`;
   }
 
-  document.getElementById('feedback').className = 'feedback show';
-  document.getElementById('q-score').textContent = `${score} pts`;
-  document.getElementById('q-streak').textContent = streak >= 2 ? `🔥 Racha de ${streak}` : '';
-
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.textContent = current + 1 < questions.length ? 'Siguiente →' : 'Ver resultado →';
-  nextBtn.className = 'btn-next show';
+  $('feedback').className = 'feedback show';
+  $('q-score').textContent = `${score} pts`;
+  $('q-streak').textContent = streak >= 2 ? `🔥 Racha de ${streak}` : '';
+  setNextBtn(isLast);
 }
 
+// --- Render pregunta ---
 function renderQuestion() {
   answered = false;
-  const q = questions[current];
-  const total = questions.length;
-  document.getElementById('progress').style.width = ((current / total) * 100) + '%';
-  document.getElementById('q-num').textContent = `Pregunta ${current + 1} de ${total}`;
-  document.getElementById('q-score').textContent = `${score} pts`;
-  document.getElementById('q-streak').textContent = streak >= 2 ? `🔥 Racha de ${streak}` : '';
-  document.getElementById('q-text').textContent = q.q;
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'feedback';
-  document.getElementById('btn-next').className = 'btn-next';
-  document.getElementById('bonus-banner').textContent = '';
-  document.getElementById('bonus-banner').className = 'bonus-banner';
+  const q = questions[current], total = questions.length;
+  $('progress').style.width = ((current / total) * 100) + '%';
+  $('q-num').textContent = `Pregunta ${current + 1} de ${total}`;
+  $('q-score').textContent = `${score} pts`;
+  $('q-streak').textContent = streak >= 2 ? `🔥 Racha de ${streak}` : '';
+  $('q-text').textContent = q.q;
+  $('feedback').textContent = '';
+  $('feedback').className = 'feedback';
+  $('btn-next').className = 'btn-next';
+  $('bonus-banner').textContent = '';
+  $('bonus-banner').className = 'bonus-banner';
 
-  const opts = document.getElementById('options');
+  const opts = $('options');
   opts.innerHTML = '';
   q.opts.forEach((opt, i) => {
     const btn = document.createElement('button');
@@ -240,13 +205,37 @@ function renderQuestion() {
     btn.onclick = () => answer(i, btn);
     opts.appendChild(btn);
   });
-
   startTimer();
 }
 
+// --- Categorías ---
+function buildCatGrid() {
+  const grid = $('cat-grid');
+  grid.innerHTML = '';
+  Object.entries(allQuestions).forEach(([key, cat]) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (selectedCat === key ? ' selected' : '');
+    btn.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div>`;
+    btn.onclick = () => { selectedCat = key; buildCatGrid(); };
+    grid.appendChild(btn);
+  });
+}
+
+// --- Flujo del juego ---
+function startGame() {
+  if (!selectedCat) {
+    const keys = Object.keys(allQuestions);
+    selectedCat = keys[Math.floor(Math.random() * keys.length)];
+  }
+  questions = shuffle([...allQuestions[selectedCat].questions]).slice(0, 8);
+  current = score = correct = streak = bestStreak = totalBonus = 0;
+  answered = false;
+  showScreen('screen-game');
+  renderQuestion();
+}
+
 function nextQuestion() {
-  current++;
-  if (current >= questions.length) showResult();
+  if (++current >= questions.length) showResult();
   else renderQuestion();
 }
 
@@ -254,18 +243,18 @@ function showResult() {
   clearInterval(timerInterval);
   showScreen('screen-result');
   const pct = Math.round((correct / questions.length) * 100);
-  let trophy, title, sub;
-  if (pct === 100) { trophy = '🏆'; title = '¡Eres una leyenda!'; sub = 'Perfecto. Mereces un lugar en el Salón de la Fama.'; }
-  else if (pct >= 75) { trophy = '⭐'; title = '¡Muy buen trabajo!'; sub = 'Claramente eres un verdadero fanático del béisbol venezolano.'; }
-  else if (pct >= 50) { trophy = '⚾'; title = '¡Buen intento!'; sub = 'Sabes bastante, pero hay más historia por aprender.'; }
-  else { trophy = '📖'; title = 'Sigue estudiando'; sub = 'El béisbol venezolano tiene mucha historia. ¡Inténtalo de nuevo!'; }
-  document.getElementById('result-trophy').textContent = trophy;
-  document.getElementById('result-title').textContent = title;
-  document.getElementById('result-sub').textContent = sub;
-  document.getElementById('res-score').textContent = score;
-  document.getElementById('res-correct').textContent = `${correct}/${questions.length}`;
-  document.getElementById('res-streak').textContent = bestStreak;
-  document.getElementById('res-bonus').textContent = totalBonus;
+  const [trophy, title, sub] =
+    pct === 100 ? ['🏆', '¡Eres una leyenda!', 'Perfecto. Mereces un lugar en el Salón de la Fama.'] :
+    pct >= 75  ? ['⭐', '¡Muy buen trabajo!', 'Claramente eres un verdadero fanático del béisbol venezolano.'] :
+    pct >= 50  ? ['⚾', '¡Buen intento!', 'Sabes bastante, pero hay más historia por aprender.'] :
+                 ['📖', 'Sigue estudiando', 'El béisbol venezolano tiene mucha historia. ¡Inténtalo de nuevo!'];
+  $('result-trophy').textContent = trophy;
+  $('result-title').textContent = title;
+  $('result-sub').textContent = sub;
+  $('res-score').textContent = score;
+  $('res-correct').textContent = `${correct}/${questions.length}`;
+  $('res-streak').textContent = bestStreak;
+  $('res-bonus').textContent = totalBonus;
 }
 
 function shareResult() {
@@ -282,24 +271,11 @@ function goHome() {
   buildCatGrid();
 }
 
-const BG_MUSIC_SRC = "Cita_de_Bases.mp3";
-
 function toggleMusic() {
-  const audio = document.getElementById("bg-music");
-  const btn = document.getElementById("music-toggle");
-  if (!audio.src) audio.src = BG_MUSIC_SRC;
-  if (audio.paused) {
-    audio.play();
-    btn.textContent = "🔊";
-  } else {
-    audio.pause();
-    btn.textContent = "🔇";
-  }
-}
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const audio = $("bg-music"), btn = $("music-toggle");
+  if (!audio.src) audio.src = "Cita_de_Bases.mp3";
+  if (audio.paused) { audio.play(); btn.textContent = "🔊"; }
+  else { audio.pause(); btn.textContent = "🔇"; }
 }
 
 buildCatGrid();
