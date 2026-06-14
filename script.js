@@ -68,8 +68,23 @@ const $ = id => document.getElementById(id);
 const $$ = sel => document.querySelectorAll(sel);
 
 function showScreen(id) {
-  $$('.screen').forEach(s => s.classList.remove('active'));
-  $(id).classList.add('active');
+  const curr = document.querySelector('.screen.active');
+  const next = $(id);
+
+  if (!curr || curr === next) {
+    $$('.screen').forEach(s => s.classList.remove('active'));
+    next.classList.add('active');
+    return;
+  }
+
+  curr.classList.add('screen-exit');
+  setTimeout(() => {
+    curr.classList.remove('active', 'screen-exit');
+    next.classList.add('active', 'screen-enter');
+    next.offsetHeight; // reflow
+    next.classList.add('screen-enter-active');
+    setTimeout(() => next.classList.remove('screen-enter', 'screen-enter-active'), 400);
+  }, 300);
 }
 
 function shuffle(arr) {

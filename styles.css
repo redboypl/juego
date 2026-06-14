@@ -106,3 +106,24 @@ html, body { overflow-x: hidden; width: 100%; height: 100%; }
 
 .btn-replay { width: 100%; padding: 12px; background: transparent; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 15px; cursor: pointer; margin-top: 10px; color: var(--color-text-primary); }
 .btn-replay:hover { background: var(--color-background-secondary); }
+
+/* --- Transiciones entre pantallas --- */
+@keyframes fadeSlideOut {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.96) translateY(-12px); }
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.screen-exit {
+  animation: fadeSlideOut 0.3s ease forwards;
+  pointer-events: none;
+}
+.screen-enter {
+  opacity: 0;
+}
+.screen-enter-active {
+  animation: fadeSlideIn 0.4s ease forwards;
+}
