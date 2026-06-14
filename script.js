@@ -279,6 +279,15 @@ function shareResult() {
   else navigator.clipboard.writeText(text).then(() => alert('Resultado copiado al portapapeles!'));
 }
 
+function confirmBack() {
+  if (confirm('¿Seguro que quieres salir? Perderás el progreso actual.')) {
+    clearInterval(timerInterval);
+    selectedCat = null;
+    showScreen('screen-home');
+    buildCatGrid();
+  }
+}
+
 function goHome() {
   clearInterval(timerInterval);
   selectedCat = null;
