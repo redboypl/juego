@@ -9,7 +9,7 @@ const DIFF_INFO = {
 };
 const allQuestions = {
   lvbp: {
-    name: "LVBP", icon: "🦁",
+    name: "LVBP", icon: "🦁", mult: 1.5,
     desc: "Todo sobre los equipos, estadios y rivalidades de la Liga Venezolana de Béisbol Profesional.",
     questions: [
       { q: "¿Cuántos equipos conforman actualmente la LVBP?", opts: ["6", "7", "8", "10"], a: 2, fact: "La LVBP tiene 8 equipos: Cardenales, Leones, Tiburones, Magallanes, Caracas, Lara, Aragua y Margarita." , dif: "facil" },
@@ -23,7 +23,7 @@ const allQuestions = {
     ]
   },
   grandesligas: {
-    name: "Grandes Ligas", icon: "🌟",
+    name: "Grandes Ligas", icon: "🌟", mult: 1.5,
     desc: "Peloteros venezolanos que triunfaron en la MLB: sus logros, equipos y récords históricos.",
     questions: [
       { q: "¿En qué posición jugó Omar Vizquel durante casi toda su carrera?", opts: ["Segunda base", "Tercera base", "Campo corto", "Centro del jardín"], a: 2, fact: "Omar Vizquel es considerado uno de los mejores campocortos defensivos de la historia." , dif: "facil" },
@@ -37,7 +37,7 @@ const allQuestions = {
     ]
   },
   historia: {
-    name: "Historia", icon: "📖",
+    name: "Historia", icon: "📖", mult: 2,
     desc: "Los orígenes del béisbol en Venezuela, sus pioneros y los momentos que marcaron la historia del deporte criollo.",
     questions: [
       { q: "¿En qué año se fundó la Liga Venezolana de Béisbol?", opts: ["1922", "1945", "1951", "1960"], a: 1, fact: "La LVBP fue fundada en 1945, siendo una de las ligas más antiguas de América Latina." , dif: "media" },
@@ -51,7 +51,7 @@ const allQuestions = {
     ]
   },
   cultura: {
-    name: "Cultura", icon: "🇻🇪",
+    name: "Cultura", icon: "🇻🇪", mult: 1,
     desc: "La relación entre el béisbol y la identidad venezolana: tradiciones, términos criollos y curiosidades del fanático.",
     questions: [
       { q: "¿Cuál es el deporte nacional de Venezuela según la ley?", opts: ["Fútbol", "Béisbol", "Boxeo", "Ciclismo"], a: 1, fact: "El béisbol es el deporte nacional de Venezuela, declarado así oficialmente." , dif: "facil" },
@@ -187,18 +187,20 @@ function answer(idx, btn) {
   if (idx === q.a) {
     const basePts = POINTS_BY_DIFFICULTY[q.dif] || 10;
     const speedBonus = calcBonus(elapsed);
+    const catMult = allQuestions[selectedCat].mult || 1;
     streak++;
     if (streak > bestStreak) bestStreak = streak;
     const streakMult = streak >= 5 ? 2 : streak >= 3 ? 1.5 : 1;
     const subtotal = basePts + speedBonus;
-    const pts = Math.round(subtotal * streakMult);
-    const streakExtra = pts - subtotal;
-    score += pts; totalBonus += (speedBonus + streakExtra); correct++;
+    const pts = Math.round(subtotal * streakMult * catMult);
+    const extra = pts - subtotal;
+    score += pts; totalBonus += (speedBonus + extra); correct++;
 
     const speedCls = elapsed < 5 ? 'fast' : elapsed < 10 ? 'normal' : 'slow';
     const speedIcon = elapsed < 5 ? '⚡ ¡Rapidísimo!' : elapsed < 10 ? '🟢 ¡Correcto!' : '🟡 ¡Correcto!';
     let bannerText = `${speedIcon} +${basePts} base`;
     if (speedBonus > 0) bannerText += ` +${speedBonus} vel.`;
+    if (catMult !== 1) bannerText += ` ×${catMult} ${allQuestions[selectedCat].icon}`;
     if (streakMult > 1) bannerText += ` ×${streakMult} 🔥`;
     bannerText += ` = ${pts} pts`;
     setBanner(streakMult > 1 ? 'streak' : speedCls, bannerText);
@@ -226,7 +228,10 @@ function renderQuestion() {
   $('q-streak').textContent = streakLabel();
   const diff = DIFF_INFO[q.dif] || DIFF_INFO.facil;
   const diffPts = POINTS_BY_DIFFICULTY[q.dif] || 10;
-  $('q-diff').textContent = `${diff.label} · vale ${diffPts} pts`;
+  const catMult = allQuestions[selectedCat].mult || 1;
+  $('q-diff').textContent = catMult !== 1
+    ? `${diff.label} · vale ${diffPts} pts ×${catMult}`
+    : `${diff.label} · vale ${diffPts} pts`;
   $('q-diff').className = 'q-diff ' + diff.cls;
   $('q-text').textContent = q.q;
   $('feedback').textContent = '';
@@ -254,7 +259,8 @@ function buildCatGrid() {
   Object.entries(allQuestions).forEach(([key, cat]) => {
     const btn = document.createElement('button');
     btn.className = 'cat-btn' + (selectedCat === key ? ' selected' : '');
-    btn.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div>`;
+    const multBadge = cat.mult !== 1 ? `<div class="cat-mult">×${cat.mult} puntos</div>` : '';
+    btn.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div>${multBadge}`;
     btn.onclick = () => { selectedCat = key; buildCatGrid();
 
 function openCredits() { showScreen('screen-credits'); }
