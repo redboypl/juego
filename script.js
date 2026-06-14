@@ -71,6 +71,9 @@ let selectedCat = null, questions = [], current = 0, score = 0, correct = 0,
     streak = 0, bestStreak = 0, totalBonus = 0, timeLeft = TIMER_MAX,
     timerInterval = null, answered = false;
 
+// --- Power-up state activo ---
+let activeExtraTime = false; // ⏱️ Tiempo extra activo para la siguiente pregunta
+
 // --- Monedas (moneda virtual persistente) ---
 const COIN_RATE = 10; // 1 moneda por cada 10 puntos
 let coins = 0;
@@ -212,8 +215,9 @@ function getTimerStyle(t) {
 function updateTimerUI() {
   const bar = $('timer-bar'), num = $('timer-num'), banner = $('bonus-banner');
   const style = getTimerStyle(timeLeft);
+  const timerMax = TIMER_MAX + (activeExtraTime ? 5 : 0); // aún no consumido
   num.textContent = timeLeft;
-  bar.style.width = ((timeLeft / TIMER_MAX) * 100) + '%';
+  bar.style.width = ((timeLeft / (timerMax || TIMER_MAX)) * 100) + '%';
   bar.style.background = style.barBg;
   num.style.color = style.numColor;
   if (!answered) {
@@ -224,7 +228,11 @@ function updateTimerUI() {
 
 function startTimer() {
   clearInterval(timerInterval);
-  timeLeft = TIMER_MAX;
+  timeLeft = TIMER_MAX + (activeExtraTime ? 5 : 0);
+  if (activeExtraTime) {
+    activeExtraTime = false; // se consume al usarse
+    showPowerupToast('⏱️ +5 seg de Tiempo extra activado!');
+  }
   updateTimerUI();
   timerInterval = setInterval(() => {
     if (--timeLeft <= 0) { clearInterval(timerInterval); timeoutQuestion(); }
@@ -335,6 +343,7 @@ function renderQuestion() {
     btn.onclick = () => answer(i, btn);
     opts.appendChild(btn);
   });
+  renderPowerupBar();
   startTimer();
 }
 
@@ -361,6 +370,7 @@ function startGame() {
   questions = shuffle([...allQuestions[selectedCat].questions]).slice(0, 8);
   current = score = correct = streak = bestStreak = totalBonus = 0;
   answered = false;
+  activeExtraTime = false;
   showScreen('screen-game');
   renderQuestion();
 }
@@ -426,6 +436,54 @@ function goHome() {
   selectedCat = null;
   showScreen('screen-home');
   buildCatGrid();
+}
+
+// --- Power-up: activar desde el juego ---
+function usePowerup(id) {
+  if (!inventory[id] || inventory[id] <= 0) return;
+  if (answered) return;
+
+  if (id === 'extra_time') {
+    inventory[id]--;
+    saveInventory();
+    timeLeft = Math.min(timeLeft + 5, 20);
+    updateTimerUI();
+    showPowerupToast('⏱️ +5 segundos añadidos!');
+    renderPowerupBar();
+  }
+}
+
+function showPowerupToast(msg) {
+  let toast = $('powerup-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'powerup-toast';
+    toast.className = 'powerup-toast';
+    document.getElementById('app').appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function renderPowerupBar() {
+  const bar = $('powerup-bar');
+  if (!bar) return;
+  bar.innerHTML = '';
+  let hasAny = false;
+  POWERUPS.forEach(p => {
+    const qty = inventory[p.id] || 0;
+    if (qty <= 0) return;
+    hasAny = true;
+    const btn = document.createElement('button');
+    btn.className = 'powerup-slot';
+    btn.title = `${p.name}: ${p.desc}`;
+    btn.innerHTML = `<span class="pu-icon">${p.icon}</span><span class="pu-qty">×${qty}</span>`;
+    btn.onclick = () => usePowerup(p.id);
+    bar.appendChild(btn);
+  });
+  bar.style.display = hasAny ? 'flex' : 'none';
 }
 
 function toggleSettings() {
