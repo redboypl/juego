@@ -105,6 +105,13 @@ function shuffle(arr) {
 
 const calcBonus = elapsed => elapsed < 5 ? 25 : elapsed < 10 ? 15 : 10;
 
+function streakLabel() {
+  if (streak >= 5) return `🔥 Racha de ${streak} (×2)`;
+  if (streak >= 3) return `🔥 Racha de ${streak} (×1.5)`;
+  if (streak >= 2) return `🔥 Racha de ${streak}`;
+  return '';
+}
+
 // --- Timer ---
 const TIMER_STYLES = [
   { min: 11, barBg: '#639922', numColor: '#3B6D11', cls: 'fast', label: '⚡ Responde rápido — bonus +25 pts' },
@@ -180,19 +187,21 @@ function answer(idx, btn) {
   if (idx === q.a) {
     const basePts = POINTS_BY_DIFFICULTY[q.dif] || 10;
     const speedBonus = calcBonus(elapsed);
-    const streakBonus = streak >= 1 ? 5 : 0;
     streak++;
     if (streak > bestStreak) bestStreak = streak;
-    const pts = basePts + speedBonus + streakBonus;
-    score += pts; totalBonus += (speedBonus + streakBonus); correct++;
+    const streakMult = streak >= 5 ? 2 : streak >= 3 ? 1.5 : 1;
+    const subtotal = basePts + speedBonus;
+    const pts = Math.round(subtotal * streakMult);
+    const streakExtra = pts - subtotal;
+    score += pts; totalBonus += (speedBonus + streakExtra); correct++;
 
     const speedCls = elapsed < 5 ? 'fast' : elapsed < 10 ? 'normal' : 'slow';
     const speedIcon = elapsed < 5 ? '⚡ ¡Rapidísimo!' : elapsed < 10 ? '🟢 ¡Correcto!' : '🟡 ¡Correcto!';
     let bannerText = `${speedIcon} +${basePts} base`;
     if (speedBonus > 0) bannerText += ` +${speedBonus} vel.`;
-    if (streakBonus > 0) bannerText += ` +${streakBonus} 🔥`;
+    if (streakMult > 1) bannerText += ` ×${streakMult} 🔥`;
     bannerText += ` = ${pts} pts`;
-    setBanner(streakBonus > 0 ? 'streak' : speedCls, bannerText);
+    setBanner(streakMult > 1 ? 'streak' : speedCls, bannerText);
     $('feedback').textContent = `✅ ${q.fact}`;
   } else {
     btn.classList.add('wrong');
@@ -203,7 +212,7 @@ function answer(idx, btn) {
 
   $('feedback').className = 'feedback show';
   $('q-score').textContent = `${score} pts`;
-  $('q-streak').textContent = streak >= 2 ? `🔥 Racha de ${streak}` : '';
+  $('q-streak').textContent = streakLabel();
   setNextBtn(isLast);
 }
 
@@ -214,7 +223,7 @@ function renderQuestion() {
   $('progress').style.width = ((current / total) * 100) + '%';
   $('q-num').textContent = `Pregunta ${current + 1} de ${total}`;
   $('q-score').textContent = `${score} pts`;
-  $('q-streak').textContent = streak >= 2 ? `🔥 Racha de ${streak}` : '';
+  $('q-streak').textContent = streakLabel();
   const diff = DIFF_INFO[q.dif] || DIFF_INFO.facil;
   const diffPts = POINTS_BY_DIFFICULTY[q.dif] || 10;
   $('q-diff').textContent = `${diff.label} · vale ${diffPts} pts`;
