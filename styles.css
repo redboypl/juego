@@ -252,19 +252,24 @@ html, body { overflow-x: hidden; width: 100%; height: 100%; }
 }
 .btn-secondary-start {
   flex: 1;
-  padding: 10px;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(6px);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: var(--border-radius-md);
-  font-size: 14px;
+  aspect-ratio: 1;
+  padding: 14px 10px;
+  background: #185FA5;
+  color: #E6F1FB;
+  border: none;
+  border-radius: 16px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  line-height: 1.3;
 }
-.btn-secondary-start:hover { background: rgba(255,255,255,0.28); }
+.btn-secondary-start:hover { background: #0C447C; }
 
 /* --- Pantalla créditos / tienda --- */
 .credits-box {
