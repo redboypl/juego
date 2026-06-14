@@ -105,6 +105,21 @@ function shuffle(arr) {
 
 const calcBonus = elapsed => elapsed < 5 ? 25 : elapsed < 10 ? 15 : 10;
 
+// --- Rangos del jugador según puntaje total ---
+const RANKS = [
+  { min: 0,   name: "Novato",          icon: "🌱" },
+  { min: 120, name: "Refuerzo",        icon: "🧢" },
+  { min: 280, name: "Titular",         icon: "⚾" },
+  { min: 480, name: "Estrella",        icon: "⭐" },
+  { min: 700, name: "Salón de la Fama", icon: "🏆" },
+];
+
+function getRank(pts) {
+  let rank = RANKS[0];
+  for (const r of RANKS) if (pts >= r.min) rank = r;
+  return rank;
+}
+
 function streakLabel() {
   if (streak >= 5) return `🔥 Racha de ${streak} (×2)`;
   if (streak >= 3) return `🔥 Racha de ${streak} (×1.5)`;
@@ -303,11 +318,19 @@ function showResult() {
   $('res-correct').textContent = `${correct}/${questions.length}`;
   $('res-streak').textContent = bestStreak;
   $('res-bonus').textContent = totalBonus;
+
+  const rank = getRank(score);
+  $('result-rank').textContent = `${rank.icon} Rango: ${rank.name}`;
+  const next = RANKS[RANKS.indexOf(rank) + 1];
+  $('result-rank-progress').textContent = next
+    ? `Te faltan ${next.min - score} pts para ${next.icon} ${next.name}`
+    : '¡Alcanzaste el rango máximo! 🎉';
 }
 
 function shareResult() {
   const cat = allQuestions[selectedCat].name;
-  const text = `Jugué la Trivia Beisbolera Venezolana (${cat}) y saqué ${score} pts con ${correct}/${questions.length} correctas y mejor racha de ${bestStreak}! ⚾🇻🇪`;
+  const rank = getRank(score);
+  const text = `Jugué la Trivia Beisbolera Venezolana (${cat}) y saqué ${score} pts (${rank.icon} ${rank.name}) con ${correct}/${questions.length} correctas y mejor racha de ${bestStreak}! ⚾🇻🇪`;
   if (navigator.share) navigator.share({ title: 'Trivia Beisbolera', text });
   else navigator.clipboard.writeText(text).then(() => alert('Resultado copiado al portapapeles!'));
 }
