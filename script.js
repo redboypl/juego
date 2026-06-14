@@ -295,11 +295,35 @@ function goHome() {
   buildCatGrid();
 }
 
+function toggleSettings() {
+  const panel = $('settings-panel'), overlay = $('settings-overlay');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
+}
+
+function closeSettings() {
+  $('settings-panel').classList.remove('open');
+  $('settings-overlay').classList.remove('open');
+}
+
 function toggleMusic() {
-  const audio = $("bg-music"), btn = $("music-toggle");
-  if (!audio.src) audio.src = "Cita_de_Bases.mp3";
-  if (audio.paused) { audio.play(); btn.textContent = "🔊"; }
-  else { audio.pause(); btn.textContent = "🔇"; }
+  const audio = $("bg-music"), btn = $("music-switch");
+  if (!audio.src || !audio.src.includes('Cita_de_Bases')) audio.src = "Cita_de_Bases.mp3";
+  if (audio.paused) {
+    audio.play();
+    btn.textContent = "ON";
+    btn.classList.add("on");
+  } else {
+    audio.pause();
+    btn.textContent = "OFF";
+    btn.classList.remove("on");
+  }
+}
+
+function setVolume(val) {
+  const audio = $("bg-music");
+  audio.volume = val / 100;
 }
 
 buildCatGrid();

@@ -13,7 +13,6 @@
   <div id="screen-start" class="screen active">
     <audio id="bg-music" loop></audio>
     <div class="start-wrap">
-      <button class="music-toggle" id="music-toggle" onclick="toggleMusic()">🔇</button>
       <img class="logo-img" src="images/image_html_1.png" alt="Trivia Beisbolera Venezuela" />
       <h1>Trivia Beisbolera</h1>
       <p>Venezuela</p>
@@ -76,6 +75,23 @@
     </div>
   </div>
 </div>
+
+  <!-- Botón engranaje global -->
+  <button class="gear-btn" id="gear-btn" onclick="toggleSettings()">⚙️</button>
+
+  <!-- Panel de ajustes -->
+  <div class="settings-panel" id="settings-panel">
+    <div class="settings-title">Ajustes</div>
+    <div class="settings-row">
+      <span>🎵 Música</span>
+      <button class="toggle-switch" id="music-switch" onclick="toggleMusic()">OFF</button>
+    </div>
+    <div class="settings-row">
+      <span>🔊 Volumen</span>
+      <input type="range" id="volume-slider" min="0" max="100" value="70" oninput="setVolume(this.value)" />
+    </div>
+  </div>
+  <div class="settings-overlay" id="settings-overlay" onclick="closeSettings()"></div>
 
 <script src="script.js"></script>
 </body>
