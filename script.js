@@ -88,6 +88,60 @@ function updateCoinDisplay() {
   $$('.coin-balance').forEach(el => el.textContent = `🪙 ${coins}`);
 }
 
+// --- Tienda: power-ups ---
+const POWERUPS = [
+  { id: 'extra_time',     icon: '⏱️', name: 'Tiempo extra',        desc: '+5 segundos en tu próxima pregunta', price: 15 },
+  { id: 'fifty_fifty',    icon: '✂️', name: '50/50',                desc: 'Elimina dos opciones incorrectas',   price: 20 },
+  { id: 'streak_shield',  icon: '🛡️', name: 'Protector de racha',  desc: 'Si fallas, no pierdes tu racha',     price: 25 },
+  { id: 'streak_starter', icon: '🔥', name: 'Racha instantánea',   desc: 'Empieza la partida con racha de 2',  price: 30 },
+];
+
+let inventory = {};
+
+function loadInventory() {
+  try {
+    inventory = JSON.parse(localStorage.getItem('trivia_inventory')) || {};
+  } catch { inventory = {}; }
+  POWERUPS.forEach(p => { if (!(p.id in inventory)) inventory[p.id] = 0; });
+}
+
+function saveInventory() {
+  localStorage.setItem('trivia_inventory', JSON.stringify(inventory));
+}
+
+function buildShopGrid() {
+  const grid = $('shop-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  POWERUPS.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'shop-card';
+    const canBuy = coins >= p.price;
+    card.innerHTML = `
+      <div class="shop-icon">${p.icon}</div>
+      <div class="shop-info">
+        <div class="shop-name">${p.name}</div>
+        <div class="shop-desc">${p.desc}</div>
+        <div class="shop-owned">Tienes: ${inventory[p.id] || 0}</div>
+      </div>
+      <button class="shop-buy" ${canBuy ? '' : 'disabled'}>🪙 ${p.price}</button>
+    `;
+    card.querySelector('.shop-buy').onclick = () => buyPowerup(p.id);
+    grid.appendChild(card);
+  });
+}
+
+function buyPowerup(id) {
+  const p = POWERUPS.find(x => x.id === id);
+  if (!p || coins < p.price) return;
+  coins -= p.price;
+  inventory[id] = (inventory[id] || 0) + 1;
+  saveCoins();
+  saveInventory();
+  updateCoinDisplay();
+  buildShopGrid();
+}
+
 // --- Helpers DOM ---
 const $ = id => document.getElementById(id);
 const $$ = sel => document.querySelectorAll(sel);
@@ -407,7 +461,8 @@ function setVolume(val) {
 
 buildCatGrid();
 loadCoins();
+loadInventory();
 updateCoinDisplay();
 
 function openCredits() { showScreen('screen-credits'); }
-function openShop() { showScreen('screen-shop'); }
+function openShop() { buildShopGrid(); showScreen('screen-shop'); }
