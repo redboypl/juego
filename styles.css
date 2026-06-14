@@ -342,10 +342,31 @@ html, body { overflow-x: hidden; width: 100%; height: 100%; }
 }
 
 /* --- Pantalla créditos / tienda --- */
+#screen-credits,
+#screen-shop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow-y: auto;
+}
+#screen-credits::before,
+#screen-shop::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('images/image_css_1.png');
+  background-size: cover;
+  background-position: center center;
+  filter: blur(8px) brightness(0.55);
+  transform: scale(1.05);
+  z-index: 0;
+}
 .credits-box {
-  text-align: center;
-  padding: 1.5rem 0.5rem 2rem;
   position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 1.5rem 1rem 2rem;
+  color: #fff;
 }
 .credits-back {
   position: absolute;
@@ -356,17 +377,20 @@ html, body { overflow-x: hidden; width: 100%; height: 100%; }
 .credits-title {
   font-size: 24px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
   margin-bottom: 8px;
 }
 .credits-sub {
   font-size: 14px;
-  color: var(--color-text-secondary);
+  color: rgba(255,255,255,0.8);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
 .credits-card {
-  background: var(--color-background-secondary);
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.25);
   border-radius: var(--border-radius-md);
   padding: 1rem;
   margin-bottom: 10px;
@@ -374,7 +398,7 @@ html, body { overflow-x: hidden; width: 100%; height: 100%; }
 }
 .credits-role {
   font-size: 11px;
-  color: var(--color-text-secondary);
+  color: rgba(255,255,255,0.65);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 4px;
@@ -382,10 +406,16 @@ html, body { overflow-x: hidden; width: 100%; height: 100%; }
 .credits-name {
   font-size: 17px;
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: #fff;
 }
 .credits-footer {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: rgba(255,255,255,0.7);
   margin-top: 1.5rem;
 }
+.credits-back {
+  color: rgba(255,255,255,0.9) !important;
+  border-color: rgba(255,255,255,0.3) !important;
+  background: rgba(0,0,0,0.2) !important;
+}
+.credits-back:hover { background: rgba(0,0,0,0.35) !important; }
