@@ -71,6 +71,23 @@ let selectedCat = null, questions = [], current = 0, score = 0, correct = 0,
     streak = 0, bestStreak = 0, totalBonus = 0, timeLeft = TIMER_MAX,
     timerInterval = null, answered = false;
 
+// --- Monedas (moneda virtual persistente) ---
+const COIN_RATE = 10; // 1 moneda por cada 10 puntos
+let coins = 0;
+
+function loadCoins() {
+  const saved = localStorage.getItem('trivia_coins');
+  coins = saved ? parseInt(saved, 10) || 0 : 0;
+}
+
+function saveCoins() {
+  localStorage.setItem('trivia_coins', String(coins));
+}
+
+function updateCoinDisplay() {
+  $$('.coin-balance').forEach(el => el.textContent = `🪙 ${coins}`);
+}
+
 // --- Helpers DOM ---
 const $ = id => document.getElementById(id);
 const $$ = sel => document.querySelectorAll(sel);
@@ -322,6 +339,15 @@ function showResult() {
   $('result-rank-progress').textContent = next
     ? `Te faltan ${next.min - score} pts para ${next.icon} ${next.name}`
     : '¡Alcanzaste el rango máximo! 🎉';
+
+  // --- Monedas ganadas ---
+  let earnedCoins = Math.floor(score / COIN_RATE);
+  if (correct === questions.length) earnedCoins += 10; // partida perfecta
+  if (bestStreak >= 5) earnedCoins += 5;                // racha máxima (×2)
+  coins += earnedCoins;
+  saveCoins();
+  $('res-coins-earned').textContent = `+${earnedCoins} 🪙`;
+  updateCoinDisplay();
 }
 
 function shareResult() {
@@ -380,6 +406,8 @@ function setVolume(val) {
 }
 
 buildCatGrid();
+loadCoins();
+updateCoinDisplay();
 
 function openCredits() { showScreen('screen-credits'); }
 function openShop() { showScreen('screen-shop'); }

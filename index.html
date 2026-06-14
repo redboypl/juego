@@ -13,6 +13,7 @@
   <div id="screen-start" class="screen active">
     <audio id="bg-music" loop></audio>
     <div class="start-wrap">
+      <div class="coin-balance" id="coin-start"></div>
       <img class="logo-img" src="images/image_html_1.png" alt="Trivia Beisbolera Venezuela" />
       <h1>Trivia Beisbolera</h1>
       <p>Venezuela</p>
@@ -53,6 +54,7 @@
 
   <div id="screen-home" class="screen">
     <div class="logo">
+      <div class="coin-balance" id="coin-home"></div>
       <img class="logo-img" src="images/image_html_2.png" alt="Trivia Beisbolera Venezuela" />
       <h1>Trivia Beisbolera</h1>
       <p>¿Cuánto sabes del béisbol venezolano?</p>
@@ -73,6 +75,13 @@
       <div class="bonus-row"><span>🔥 Racha 3-4</span><span>×1.5 al total</span></div>
       <div class="bonus-row"><span>🔥 Racha 5+</span><span>×2 al total</span></div>
       <div class="bonus-row"><span>⏱ Sin responder</span><span>0 pts</span></div>
+    </div>
+
+    <div class="bonus-legend">
+      <p>🪙 Cómo ganar monedas</p>
+      <div class="bonus-row"><span>Cada 10 pts de puntaje</span><span>+1 🪙</span></div>
+      <div class="bonus-row"><span>Partida perfecta (8/8)</span><span>+10 🪙</span></div>
+      <div class="bonus-row"><span>Racha máxima (×2)</span><span>+5 🪙</span></div>
     </div>
 
     <div class="categories" id="cat-grid"></div>
@@ -106,6 +115,10 @@
       <div class="result-sub" id="result-sub"></div>
       <div class="result-rank" id="result-rank"></div>
       <div class="result-rank-progress" id="result-rank-progress"></div>
+      <div class="result-coins">
+        <span>Monedas ganadas: <strong id="res-coins-earned">+0 🪙</strong></span>
+        <span class="coin-balance" id="coin-result"></span>
+      </div>
       <div class="result-stats">
         <div class="stat-card"><div class="stat-label">Puntaje</div><div class="stat-val" id="res-score">0</div></div>
         <div class="stat-card"><div class="stat-label">Correctas</div><div class="stat-val" id="res-correct">0/8</div></div>
