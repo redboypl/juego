@@ -293,8 +293,7 @@ html, body { overflow-x: hidden; width: 100%; height: 100%; }
 }
 .btn-secondary-start {
   flex: 1;
-  aspect-ratio: 1;
-  padding: 14px 10px;
+  padding: 13px 10px;
   background: linear-gradient(180deg, #5BB8FF 0%, #1A7FD4 40%, #0D5CAD 100%);
   color: #fff;
   border: none;
