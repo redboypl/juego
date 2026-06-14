@@ -231,7 +231,10 @@ function buildCatGrid() {
     const btn = document.createElement('button');
     btn.className = 'cat-btn' + (selectedCat === key ? ' selected' : '');
     btn.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div>`;
-    btn.onclick = () => { selectedCat = key; buildCatGrid(); };
+    btn.onclick = () => { selectedCat = key; buildCatGrid();
+
+function openCredits() { showScreen('screen-credits'); }
+function openShop() { showScreen('screen-shop'); } };
     grid.appendChild(btn);
   });
 }
@@ -285,6 +288,9 @@ function confirmBack() {
     selectedCat = null;
     showScreen('screen-home');
     buildCatGrid();
+
+function openCredits() { showScreen('screen-credits'); }
+function openShop() { showScreen('screen-shop'); }
   }
 }
 
@@ -293,6 +299,9 @@ function goHome() {
   selectedCat = null;
   showScreen('screen-home');
   buildCatGrid();
+
+function openCredits() { showScreen('screen-credits'); }
+function openShop() { showScreen('screen-shop'); }
 }
 
 function toggleSettings() {
@@ -327,3 +336,6 @@ function setVolume(val) {
 }
 
 buildCatGrid();
+
+function openCredits() { showScreen('screen-credits'); }
+function openShop() { showScreen('screen-shop'); }

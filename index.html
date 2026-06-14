@@ -16,7 +16,38 @@
       <img class="logo-img" src="images/image_html_1.png" alt="Trivia Beisbolera Venezuela" />
       <h1>Trivia Beisbolera</h1>
       <p>Venezuela</p>
-      <button class="btn-primary" onclick="goHome()">Comenzar ↗</button>
+      <button class="btn-primary" onclick="goHome()">Jugar ↗</button>
+      <div class="start-secondary-btns">
+        <button class="btn-secondary-start" onclick="openShop()">🛒 Tienda</button>
+        <button class="btn-secondary-start" onclick="openCredits()">⭐ Créditos</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-credits" class="screen">
+    <div class="credits-box">
+      <button class="btn-back credits-back" onclick="showScreen('screen-start')">← Volver</button>
+      <div class="credits-trophy">⚾</div>
+      <h2 class="credits-title">Créditos</h2>
+      <p class="credits-sub">Este juego fue creado con pasión por el béisbol venezolano.</p>
+      <div class="credits-card">
+        <div class="credits-role">Diseño y Desarrollo</div>
+        <div class="credits-name">Francisco González</div>
+      </div>
+      <div class="credits-card">
+        <div class="credits-role">Contenido y Preguntas</div>
+        <div class="credits-name">Francisco González</div>
+      </div>
+      <p class="credits-footer">🇻🇪 Hecho con orgullo venezolano</p>
+    </div>
+  </div>
+
+  <div id="screen-shop" class="screen">
+    <div class="credits-box">
+      <button class="btn-back credits-back" onclick="showScreen('screen-start')">← Volver</button>
+      <div class="credits-trophy">🛒</div>
+      <h2 class="credits-title">Tienda</h2>
+      <p class="credits-sub">Próximamente...</p>
     </div>
   </div>
 
