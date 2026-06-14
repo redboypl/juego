@@ -276,10 +276,7 @@ function buildCatGrid() {
     btn.className = 'cat-btn' + (selectedCat === key ? ' selected' : '');
     const multBadge = cat.mult !== 1 ? `<div class="cat-mult">×${cat.mult} puntos</div>` : '';
     btn.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div>${multBadge}`;
-    btn.onclick = () => { selectedCat = key; buildCatGrid();
-
-function openCredits() { showScreen('screen-credits'); }
-function openShop() { showScreen('screen-shop'); } };
+    btn.onclick = () => { selectedCat = key; buildCatGrid(); };
     grid.appendChild(btn);
   });
 }
@@ -341,9 +338,6 @@ function confirmBack() {
     selectedCat = null;
     showScreen('screen-home');
     buildCatGrid();
-
-function openCredits() { showScreen('screen-credits'); }
-function openShop() { showScreen('screen-shop'); }
   }
 }
 
@@ -352,9 +346,6 @@ function goHome() {
   selectedCat = null;
   showScreen('screen-home');
   buildCatGrid();
-
-function openCredits() { showScreen('screen-credits'); }
-function openShop() { showScreen('screen-shop'); }
 }
 
 function toggleSettings() {
